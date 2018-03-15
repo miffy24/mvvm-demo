@@ -48,74 +48,68 @@ let model = new Model({
   resource:'book'
 })
 
-let view = new View({
+let view = new Vue({
   el: '#app',
+    data:{
+    book:{
+      name: '未命名',
+      number: 0,
+      id: ''
+    },
+  n:1,
+  },
   template: `
     <div>
-    书名：《__name__》
-    数量：<span id=number>__number__</span>
-    </div>
-    <div>
-      <button id="addOne">加1</button>
-      <button id="minusOne">减1</button>
-      <button id="reset">归零</button>
-    </div>
-  `
+        <div>
+        书名：《{{book.name}}》
+        数量：<span id=number>{{book.number}}</span>
+        </div>
+        <div>
+          <input v-model="n">
+        </div>
+        <div>
+          <button v-on:click="addOne">加{{n}}</button>
+          <button v-on:click="minusOne">减{{n}}</button>
+          <button v-on:click="reset">归零</button>
+        </div>
+    </div> 
+  `,
+  created(){
+    model.fetch(1).then(()=>{
+      this.book = model.data
+    })
+  },
+  
+  methods:{
+    addOne(){
+      model.update({
+        number: this.book.number + (this.n - 0)
+      }).then(()=>{
+        this.view.book = model.data
+      
+      })
+    },
+    minusOne(){
+        model.update({
+          number:this.book.number - (this.n - 0) 
+        }).then(()=>{
+          this.view.book = this.model.data
+        })      
+      
+
+    },
+    reset(){
+      model.update({
+        number:0
+      }).then(()=>{
+        this.view.book = this.model.data
+      })
+    }
+  }
 })
 
 
-var controller = {
-  init(options){
-    this.view = options.view
-    this.model = options.model
-    this.view = view 
-    this.model = model
-    
-    this.view.render(this.model.data)
-    this.bindEvents()
-    this.model.fetch(1).then(()=>{
-      this.view.render(this.model.data)
-    })
-  },
-  addOne(){
-    let oldNumber = $('#number').text()
-    let newNumber = oldNumber-0+1
-    this.model.update({
-      number: newNumber
-    }).then(()=>{
-      this.view.render(this.model.data)
-      
-    })
-  },
-  minusOne(){
-    let oldNumber = $('#number').text()
-      if(oldNumber>0){
-      let newNumber = oldNumber-0-1
-      this.model.update({
-        number:newNumber
-      }).then(()=>{
-        this.view.render(this.model.data)
-      })      
-    }else{
-      alert('没有库存了')
-    }
 
-  },
-  reset(){
-    this.model.update({
-      number:0
-    }).then(()=>{
-      this.view.render(this.model.data)
-    })
-  },
-  bindEvents(){
-    $(this.view.el).on('click','#addOne',this.addOne.bind(this))
-    $(this.view.el).on('click','#minusOne',this.minusOne.bind(this))
-    $(this.view.el).on('click', '#reset', this.reset.bind(this))
-  }
-  
-}
-controller.init({view:view,model:model})
 
 //不要看
 
